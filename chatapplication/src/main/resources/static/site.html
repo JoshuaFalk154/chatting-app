@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal WebSocket Test</title>
+</head>
+<body>
+<h2>WebSocket Test</h2>
+<div id="status">Not connected</div>
+<input type="text" id="msgInput" placeholder="Type message"/>
+<button id="sendBtn">Send Message</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    let stompClient;
+
+    const statusEl = document.getElementById('status');
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Verbindung direkt beim Laden herstellen
+    const socket = new SockJS('/chat-app');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, () => {
+        statusEl.textContent = "Connected!";
+        console.log("Connected to /chat-app");
+    }, (err) => {
+        statusEl.textContent = "Connection failed!";
+        console.error(err);
+    });
+
+    // Nachricht senden beim Klick
+    sendBtn.addEventListener('click', () => {
+        if (stompClient && stompClient.connected) {
+            const msg = msgInput.value.trim();
+            if(msg) {
+                stompClient.send("/app/sendMessage/room1", {}, JSON.stringify({sender: "testUser", content: msg, type: "CHAT"}));
+                console.log("Sent:", msg);
+            }
+        } else {
+            console.log("Not connected yet.");
+        }
+    });
+</script>
+</body>
+</html>

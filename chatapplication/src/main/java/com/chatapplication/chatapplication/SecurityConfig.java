@@ -1,29 +1,33 @@
-package com.chatapplication.chatapplication.config;
+package com.chatapplication.chatapplication;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
     private final CustomCorsConfiguration customCorsConfiguration;
+    private final JwtAuthConverter converter;
 
-    public SecurityConfig(CustomCorsConfiguration customCorsConfiguration) {
+    public SecurityConfig(CustomCorsConfiguration customCorsConfiguration, JwtAuthConverter converter) {
         this.customCorsConfiguration = customCorsConfiguration;
+        this.converter = converter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
+                        // .anyRequest().authenticated()
+                        .anyRequest().permitAll()
+
                 ).cors(c -> c.configurationSource(customCorsConfiguration))
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwtConfigurer ->
+                        jwtConfigurer.jwtAuthenticationConverter(converter)
+                ))
                 .build();
 
     }

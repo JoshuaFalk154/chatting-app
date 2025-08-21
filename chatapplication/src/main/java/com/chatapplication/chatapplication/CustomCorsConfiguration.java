@@ -1,4 +1,4 @@
-package com.chatapplication.chatapplication.config;
+package com.chatapplication.chatapplication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
