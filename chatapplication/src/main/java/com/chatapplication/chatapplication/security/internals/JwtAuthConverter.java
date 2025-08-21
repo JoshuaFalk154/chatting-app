@@ -1,5 +1,7 @@
-package com.chatapplication.chatapplication;
+package com.chatapplication.chatapplication.security.internals;
 
+import com.chatapplication.chatapplication.userService.UserCreateOrUpdate;
+import com.chatapplication.chatapplication.userService.UserServiceAPI;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,7 +9,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,14 +20,22 @@ import java.util.stream.Stream;
 @Component
 public class JwtAuthConverter implements Converter<Jwt, JwtAuthenticationToken> {
 
-    // TODO
-    // create user if not existing
+    private final UserServiceAPI userServiceAPI;
+
+    public JwtAuthConverter(UserServiceAPI userServiceAPI) {
+        this.userServiceAPI = userServiceAPI;
+    }
 
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Override
     public JwtAuthenticationToken convert(Jwt source) {
         String sub = source.getClaim("sub");
+        userServiceAPI.createOrUpdate(new UserCreateOrUpdate(
+                source.getClaim("sub"),
+                source.getClaim("email"),
+                source.getClaim("preferred_username")
+        ));
 
         List<GrantedAuthority> auths = Stream.concat(extractRoles(source).stream(),
                         jwtGrantedAuthoritiesConverter.convert(source).stream())

@@ -1,4 +1,4 @@
-package com.chatapplication.chatapplication;
+package com.chatapplication.chatapplication.security.internals;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
